@@ -1,0 +1,40 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: pnpm/action-setup@v2.2.2
+        with:
+          version: 7
+
+      - name: Install modules
+        run: pnpm install
+
+      - name: Check linting
+        run: pnpm lint
+
+      - name: Build typescript
+        run: pnpm tsc
+
+      - name: Test
+        run: pnpm test -- --coverage
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          # token: ${{ secrets.CODECOV_TOKEN }}
+          directory: ./coverage/
+          flags: integration
+          name: codecov-umbrella
+          fail_ci_if_error: false
+          verbose: true
